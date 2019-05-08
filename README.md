@@ -33,7 +33,7 @@ If you know your way around Git, you can download this plugin as a submodule:
 
 ```text
 $ cd path/to/kirby-project
-$ git submodule add https://github.com/texnixe/kirby-csv-handler site/plugins/kirby-csv-handler
+$ git submodule add https://github.com/lukehatfield/kirby-csv-handler site/plugins/kirby-csv-handler
 ```
 
 ## Setup
