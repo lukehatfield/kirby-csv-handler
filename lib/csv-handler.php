@@ -65,6 +65,14 @@ class CsvHandler {
 
       if ($this->parse_header) {
         foreach ($this->header as $i => $heading_i) {
+
+
+            // H4All exceptions, but wont work b/c check for key later
+            if($heading_i == 'Institutions')
+
+                // do Institutions and Press as structured items
+
+                // $heading_i = 'Title'
           $row_new[$heading_i] = $row[$i];
         }
         $data[] = $row_new;
@@ -96,6 +104,8 @@ class CsvHandler {
       foreach($items as $item) {
 
         $data = $item;
+
+
         // check if the index $UIDKey exists
 
         if(isset($item[$UIDKey])) {
@@ -107,7 +117,7 @@ class CsvHandler {
             $folderName = str::slug($item[$UIDKey]);
 
         } else {
-          throw new Exception("The index does not exists");
+          throw new Exception("The index does not exist");
         }
 
         if(page($parent)->children()->findBy('uid', $folderName)) {

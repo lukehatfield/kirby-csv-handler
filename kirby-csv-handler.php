@@ -1,9 +1,10 @@
 <?php
 
 /**
- * Kirby CSV Handler Plugin
+ * Fork of Kirby CSV Handler Plugin
  *
- * @author Sonja Broda <sonja@texniq.de>
+ * @originalauthor Sonja Broda <sonja@texniq.de>
+ * @author Luke Hatfield
  */
 
 include __DIR__ . DS . 'routes.php';
