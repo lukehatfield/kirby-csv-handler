@@ -12,7 +12,7 @@ If you are using the Kirby CLI, you can install this plugin by running the follo
 
 ```text
 $ cd path/to/kirby
-$ kirby plugin:install texnixe/kirby-csv-handler
+$ kirby plugin:install lukehatfield/kirby-csv-handler
 ```
 
 
