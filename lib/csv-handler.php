@@ -61,6 +61,10 @@ class CsvHandler {
     else
     $lineCount = -1; // so loop limit is ignored
 
+    // init institutions structure field
+    $institutions = ''; // so not undefined 
+
+
     while ($lineCount < $maxLines && ($row = fgetcsv($this->file, $this->length, $this->delimiter)) !== false) {
 
       if ($this->parse_header) {
@@ -68,13 +72,29 @@ class CsvHandler {
 
 
             // H4All exceptions, but wont work b/c check for key later
-            if($heading_i == 'Institutions')
-
+            if($heading_i == 'Institution') {
                 // do Institutions and Press as structured items
+                $institutions = PHP_EOL . PHP_EOL . '-' . PHP_EOL . '  institute: ' . $row[$i] . PHP_EOL;
 
-                // $heading_i = 'Title'
-          $row_new[$heading_i] = $row[$i];
+            } elseif($heading_i == 'InstCity') {
+                $institutions = $institutions . '  location: |' . PHP_EOL;
+                $institutions = $institutions . '    address: ' . $row[$i];
+            } elseif($heading_i == 'InstState') {
+                $institutions = $institutions . ', ' . $row[$i] . PHP_EOL;
+            } elseif($heading_i == 'InstZIP') {
+                $institutions = $institutions . '    zoom: "9"' . PHP_EOL;
+                $institutions = $institutions . '  postalcode: ' . $row[$i] . PHP_EOL;
+            } else {
+                // regular
+                $row_new[$heading_i] = $row[$i];
+            }
+            // $heading_i = 'Title'
+
         }
+
+        // after collected all data, add institution structure to data
+        $row_new['Institutions'] = $institutions;
+
         $data[] = $row_new;
       } else {
         $data[] = $row;
@@ -83,6 +103,7 @@ class CsvHandler {
       if ($maxLines > 0)
       $lineCount++;
     }
+
     return $data;
   }
 
