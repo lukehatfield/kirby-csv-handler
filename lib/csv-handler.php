@@ -5,6 +5,8 @@ use Str;
 use Exception;
 use Yaml;
 
+// geolocating
+use Kirby\Geo;
 
 class CsvHandler {
 
@@ -68,8 +70,9 @@ class CsvHandler {
     while ($lineCount < $maxLines && ($row = fgetcsv($this->file, $this->length, $this->delimiter)) !== false) {
 
       if ($this->parse_header) {
+        // placehold for geolocation loop
+        $city = '';
         foreach ($this->header as $i => $heading_i) {
-
 
             // H4All exceptions, but wont work b/c check for key later
             if($heading_i == 'Institution') {
@@ -78,9 +81,25 @@ class CsvHandler {
 
             } elseif($heading_i == 'InstCity') {
                 $institutions = $institutions . '  location: |' . PHP_EOL;
-                $institutions = $institutions . '    address: ' . $row[$i];
+                $institutions = $institutions . '    address: ' . $row[$i];              
+                $city = $row[$i]; // save for geolocating
             } elseif($heading_i == 'InstState') {
                 $institutions = $institutions . ', ' . $row[$i] . PHP_EOL;
+
+                // get lat and lng from google
+                // uses geo-plugin, from https://github.com/getkirby-plugins/geo-plugin
+                $getLocationOn = true;
+                if($getLocationOn) {
+                    $latitude = geo::locate($city . ', ' . $row[$i])->lat();
+                    $longitude = geo::locate($city . ', ' . $row[$i])->lng();
+
+                    throw new Exception("location didn't work");
+
+                    // add lat and lng to yml
+                    $institutions = $institutions . '    lat: "' . $latitude . '"' . PHP_EOL;
+                    $institutions = $institutions . '    lng: "' . $longitude . '"' . PHP_EOL;
+                }
+
             } elseif($heading_i == 'InstZIP') {
                 $institutions = $institutions . '    zoom: "9"' . PHP_EOL;
                 $institutions = $institutions . '  postalcode: ' . $row[$i] . PHP_EOL;
