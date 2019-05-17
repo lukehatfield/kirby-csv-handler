@@ -93,7 +93,7 @@ class CsvHandler {
                     $latitude = geo::locate($city . ', ' . $row[$i])->lat();
                     $longitude = geo::locate($city . ', ' . $row[$i])->lng();
 
-                    throw new Exception("location didn't work");
+                    // throw new Exception("location didn't work");
 
                     // add lat and lng to yml
                     $institutions = $institutions . '    lat: "' . $latitude . '"' . PHP_EOL;
