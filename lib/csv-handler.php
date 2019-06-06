@@ -108,8 +108,13 @@ class CsvHandler {
                 $institutions = $institutions . '    zoom: "9"' . PHP_EOL;
                 $institutions = $institutions . '  postalcode: ' . $row[$i] . PHP_EOL;
             } else {
-                // regular
-                $row_new[$heading_i] = $row[$i];
+                // regular, skip id and title fields
+                if($heading_i != 'Id') {
+                    // convert footmark to apostrophe
+                    $cleanData = str_replace("'", "’", $row[$i]);
+                    // save
+                    $row_new[$heading_i] = $cleanData;
+                }
             }
             // $heading_i = 'Title'
 
@@ -169,6 +174,9 @@ class CsvHandler {
         if(page($parent)->children()->findBy('uid', $folderName)) {
 
           if($update) {
+
+            // don't update title field, so remove it from $data to update
+            unset($data[$UIDKey]);
 
             try {
 
