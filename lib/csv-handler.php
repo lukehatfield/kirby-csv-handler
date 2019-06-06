@@ -63,10 +63,6 @@ class CsvHandler {
     else
     $lineCount = -1; // so loop limit is ignored
 
-    // init institutions structure field
-    $institutions = ''; // so not undefined 
-
-
     while ($lineCount < $maxLines && ($row = fgetcsv($this->file, $this->length, $this->delimiter)) !== false) {
 
       if ($this->parse_header) {
@@ -76,6 +72,9 @@ class CsvHandler {
 
             // H4All exceptions, but wont work b/c check for key later
             if($heading_i == 'Institution') {
+                // init institutions structure field, only if in imported CSV
+                $institutions = ''; // so not undefined 
+
                 // do Institutions and Press as structured items
                 $institutions = PHP_EOL . PHP_EOL . '-' . PHP_EOL . '  institute: ' . $row[$i] . PHP_EOL;
 
