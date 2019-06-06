@@ -63,6 +63,9 @@ class CsvHandler {
     else
     $lineCount = -1; // so loop limit is ignored
 
+    // flag for adding institution field back at end, if exists
+    $hasInstitution = false;
+
     while ($lineCount < $maxLines && ($row = fgetcsv($this->file, $this->length, $this->delimiter)) !== false) {
 
       if ($this->parse_header) {
@@ -72,6 +75,8 @@ class CsvHandler {
 
             // H4All exceptions, but wont work b/c check for key later
             if($heading_i == 'Institution') {
+                // now can add this back at end
+                $hasInstitution = true;
                 // init institutions structure field, only if in imported CSV
                 $institutions = ''; // so not undefined 
 
@@ -110,8 +115,10 @@ class CsvHandler {
 
         }
 
-        // after collected all data, add institution structure to data
-        $row_new['Institutions'] = $institutions;
+        // after collected all data, add institution structure to data, if exists
+        if($hasInstitution) {
+            $row_new['Institutions'] = $institutions;
+        }
 
         $data[] = $row_new;
       } else {
