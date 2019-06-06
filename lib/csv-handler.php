@@ -165,7 +165,13 @@ class CsvHandler {
           if(ctype_digit(substr($UIDKey, 0, 1))) {
             $UIDKey = '_' . $UIDKey;
           }
+
+            // convert footnote to dash, similar to kirby creation, from 
+            // str::slug seems to remove certain things
+            // $dashTitle = str_replace(str_split("\\/:'’*<>|"), "-", $item[$UIDKey]);
             $folderName = str::slug($item[$UIDKey]);
+            // $dashTitle = str::slug($item[$UIDKey], '-', 'a-z0-9@._-');
+            // $folderName = $dashTitle;
 
         } else {
           throw new Exception("The index does not exist");
