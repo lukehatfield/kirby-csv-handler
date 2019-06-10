@@ -108,16 +108,14 @@ class CsvHandler {
                 $institutions = $institutions . '    zoom: "9"' . PHP_EOL;
                 $institutions = $institutions . '  postalcode: ' . $row[$i] . PHP_EOL;
             } else {
-                // regular, skip id and title fields
-                if($heading_i != 'Id') {
+                // regular, skip id field because in Kirby, id is title slugified
+                if($heading_i != 'ID') {
                     // convert footmark to apostrophe
                     $cleanData = str_replace("'", "’", $row[$i]);
                     // save
                     $row_new[$heading_i] = $cleanData;
                 }
             }
-            // $heading_i = 'Title'
-
         }
 
         // after collected all data, add institution structure to data, if exists
