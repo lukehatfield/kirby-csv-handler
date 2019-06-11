@@ -77,6 +77,11 @@ class CsvHandler {
         $city = '';
         foreach ($this->header as $i => $heading_i) {
 
+            if (strpos($heading_i, 'Title') !== false) {
+                // convert footmark to apostrophe
+                $projectTitle = $row[$i];
+            }
+
             // H4All exceptions, but wont work b/c check for key later
             // if($heading_i == 'Inst1 Name') {
             // If an institute...
@@ -89,33 +94,36 @@ class CsvHandler {
                 // $institutionVersion = substr($heading_i, strpos($heading_i, "Inst") + strlen("Inst"), 1);    
 
                 // do name
-                if(strpos($heading_i, 'Name') !== false) {
+                if(strpos($heading_i, 'Name') !== false && '' != $row[$i]) {
                     // do Institutions and Press as structured items
                     $institutions = $institutions . PHP_EOL . '-' . PHP_EOL . '  institute: ' . $row[$i] . PHP_EOL;
-                } elseif(strpos($heading_i, 'City') !== false) {
+                } elseif(strpos($heading_i, 'City') !== false && '' != $row[$i]) {
                     $institutions = $institutions . '  location: |' . PHP_EOL;
                     $institutions = $institutions . '    address: ' . $row[$i];              
                     $city = $row[$i]; // save for geolocating
-                } elseif(strpos($heading_i, 'State') !== false) {
+                } elseif(strpos($heading_i, 'State') !== false && '' != $row[$i]) {
                     $institutions = $institutions . ', ' . $row[$i] . PHP_EOL;
                     // get lat and lng from google
                     // uses geo-plugin, from https://github.com/getkirby-plugins/geo-plugin
                     $getLocationOn = true;
                     if($getLocationOn) {
-                        $latitude = geo::locate($city . ', ' . $row[$i])->lat();
-                        $longitude = geo::locate($city . ', ' . $row[$i])->lng();
+                        // check for placeholder institutions
+                        if('' != $city && '' != $row[$i]) {
+                            $latitude = geo::locate($city . ', ' . $row[$i])->lat();
+                            $longitude = geo::locate($city . ', ' . $row[$i])->lng();
 
-                        // throw new Exception("location didn't work");
-                        // add lat and lng to yml
-                        $institutions = $institutions . '    lat: "' . $latitude . '"' . PHP_EOL;
-                        $institutions = $institutions . '    lng: "' . $longitude . '"' . PHP_EOL;
+                            // throw new Exception("location didn't work");
+                            // add lat and lng to yml
+                            $institutions = $institutions . '    lat: "' . $latitude . '"' . PHP_EOL;
+                            $institutions = $institutions . '    lng: "' . $longitude . '"' . PHP_EOL;
+                        }                        
                     }
-                } elseif(strpos($heading_i, 'Zip') !== false) {
+                } elseif(strpos($heading_i, 'Zip') !== false && '' != $row[$i]) {
                     $institutions = $institutions . '    zoom: "9"' . PHP_EOL;
                     $institutions = $institutions . '  postalcode: ' . $row[$i] . PHP_EOL;
-                } elseif(strpos($heading_i, 'Type 1') !== false) {
+                } elseif(strpos($heading_i, 'Type 1') !== false && '' != $row[$i]) {
                     $institutions = $institutions . '  institution_type_1: ' . $row[$i] . PHP_EOL;
-                } elseif(strpos($heading_i, 'Type 2') !== false) {
+                } elseif(strpos($heading_i, 'Type 2') !== false && '' != $row[$i]) {
                     $institutions = $institutions . '  institution_type_2: ' . $row[$i];
                 }
 
@@ -171,7 +179,7 @@ class CsvHandler {
             $row_new['Press'] = PHP_EOL . $press;
         }
         // after collected all data, add press structure to data, if exists
-        if($hasFootnotes) {
+        if(isset($hasFootnotes) && $hasFootnotes) {
             $row_new['Footnotes'] = PHP_EOL . $footnotes;
         }
 
