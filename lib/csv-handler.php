@@ -69,44 +69,87 @@ class CsvHandler {
     while ($lineCount < $maxLines && ($row = fgetcsv($this->file, $this->length, $this->delimiter)) !== false) {
 
       if ($this->parse_header) {
+        // init institutions structure field, only if in imported CSV
+        $institutions = ''; // so not undefined 
+        $press = ''; // so not undefined 
+        $footnotes = ''; // so not undefined 
         // placehold for geolocation loop
         $city = '';
         foreach ($this->header as $i => $heading_i) {
 
             // H4All exceptions, but wont work b/c check for key later
-            if($heading_i == 'Institution') {
+            // if($heading_i == 'Inst1 Name') {
+            // If an institute...
+            if (strpos($heading_i, 'Inst') !== false) {
                 // now can add this back at end
                 $hasInstitution = true;
-                // init institutions structure field, only if in imported CSV
-                $institutions = ''; // so not undefined 
 
-                // do Institutions and Press as structured items
-                $institutions = PHP_EOL . PHP_EOL . '-' . PHP_EOL . '  institute: ' . $row[$i] . PHP_EOL;
 
-            } elseif($heading_i == 'InstCity') {
-                $institutions = $institutions . '  location: |' . PHP_EOL;
-                $institutions = $institutions . '    address: ' . $row[$i];              
-                $city = $row[$i]; // save for geolocating
-            } elseif($heading_i == 'InstState') {
-                $institutions = $institutions . ', ' . $row[$i] . PHP_EOL;
+                // get number right after "Inst"
+                // $institutionVersion = substr($heading_i, strpos($heading_i, "Inst") + strlen("Inst"), 1);    
 
-                // get lat and lng from google
-                // uses geo-plugin, from https://github.com/getkirby-plugins/geo-plugin
-                $getLocationOn = true;
-                if($getLocationOn) {
-                    $latitude = geo::locate($city . ', ' . $row[$i])->lat();
-                    $longitude = geo::locate($city . ', ' . $row[$i])->lng();
+                // do name
+                if(strpos($heading_i, 'Name') !== false) {
+                    // do Institutions and Press as structured items
+                    $institutions = $institutions . PHP_EOL . '-' . PHP_EOL . '  institute: ' . $row[$i] . PHP_EOL;
+                } elseif(strpos($heading_i, 'City') !== false) {
+                    $institutions = $institutions . '  location: |' . PHP_EOL;
+                    $institutions = $institutions . '    address: ' . $row[$i];              
+                    $city = $row[$i]; // save for geolocating
+                } elseif(strpos($heading_i, 'State') !== false) {
+                    $institutions = $institutions . ', ' . $row[$i] . PHP_EOL;
+                    // get lat and lng from google
+                    // uses geo-plugin, from https://github.com/getkirby-plugins/geo-plugin
+                    $getLocationOn = true;
+                    if($getLocationOn) {
+                        $latitude = geo::locate($city . ', ' . $row[$i])->lat();
+                        $longitude = geo::locate($city . ', ' . $row[$i])->lng();
 
-                    // throw new Exception("location didn't work");
-
-                    // add lat and lng to yml
-                    $institutions = $institutions . '    lat: "' . $latitude . '"' . PHP_EOL;
-                    $institutions = $institutions . '    lng: "' . $longitude . '"' . PHP_EOL;
+                        // throw new Exception("location didn't work");
+                        // add lat and lng to yml
+                        $institutions = $institutions . '    lat: "' . $latitude . '"' . PHP_EOL;
+                        $institutions = $institutions . '    lng: "' . $longitude . '"' . PHP_EOL;
+                    }
+                } elseif(strpos($heading_i, 'Zip') !== false) {
+                    $institutions = $institutions . '    zoom: "9"' . PHP_EOL;
+                    $institutions = $institutions . '  postalcode: ' . $row[$i] . PHP_EOL;
+                } elseif(strpos($heading_i, 'Type 1') !== false) {
+                    $institutions = $institutions . '  institution_type_1: ' . $row[$i] . PHP_EOL;
+                } elseif(strpos($heading_i, 'Type 2') !== false) {
+                    $institutions = $institutions . '  institution_type_2: ' . $row[$i];
                 }
 
-            } elseif($heading_i == 'InstZIP') {
-                $institutions = $institutions . '    zoom: "9"' . PHP_EOL;
-                $institutions = $institutions . '  postalcode: ' . $row[$i] . PHP_EOL;
+            // Press
+            } elseif (strpos($heading_i, 'Press') !== false) {
+                // now can add this back at end
+                $hasPress = true;
+
+                // get number right after "Inst"
+                // $institutionVersion = substr($heading_i, strpos($heading_i, "Inst") + strlen("Inst"), 1);    
+
+                // do name
+                if(strpos($heading_i, 'Text') !== false) {
+                    // do Institutions and Press as structured items
+                    $press = $press . PHP_EOL . '-' . PHP_EOL . '  text: ' . $row[$i] . PHP_EOL;
+                } elseif(strpos($heading_i, 'Link') !== false) {
+                    $press = $press . '  link: ' . $row[$i];              
+                }
+
+
+            // Footnotes
+            } elseif (strpos($heading_i, 'Footnotes') !== false) {
+                // now can add this back at end
+                $hasFootnotes = true;
+
+                // get number right after "Inst"
+                // $institutionVersion = substr($heading_i, strpos($heading_i, "Inst") + strlen("Inst"), 1);    
+
+                // do name
+                if(strpos($heading_i, 'Text') !== false) {
+                    // do Institutions and Press as structured items
+                    $footnotes = $footnotes . PHP_EOL . '-' . PHP_EOL . '  text: ' . $row[$i];
+                }
+
             } else {
                 // regular, skip id field because in Kirby, id is title slugified
                 if($heading_i != 'ID') {
@@ -114,13 +157,22 @@ class CsvHandler {
                     $cleanData = str_replace("'", "’", $row[$i]);
                     // save
                     $row_new[$heading_i] = $cleanData;
+                    // $row_new[$heading_i] = $cleanData . '|' . $heading_i;
                 }
             }
         }
 
         // after collected all data, add institution structure to data, if exists
         if($hasInstitution) {
-            $row_new['Institutions'] = $institutions;
+            $row_new['Institutions'] = PHP_EOL . $institutions;
+        }
+        // after collected all data, add press structure to data, if exists
+        if($hasPress) {
+            $row_new['Press'] = PHP_EOL . $press;
+        }
+        // after collected all data, add press structure to data, if exists
+        if($hasFootnotes) {
+            $row_new['Footnotes'] = PHP_EOL . $footnotes;
         }
 
         $data[] = $row_new;
